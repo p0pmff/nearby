@@ -1,0 +1,1 @@
+window.SUPABASE_CONFIG={url:"REPLACE_ME",anonKey:"REPLACE_ME"};

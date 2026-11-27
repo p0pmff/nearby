@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Nearby</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0b0e18">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="vendor/leaflet.css">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div class="ph ld" id="ph">
+<div class="map" id="map"></div><div id="nz"></div><div id="dm"></div>
+<div class="top"><div class="tl"><button id="bk" data-a="back">‹</button><b id="ttl">Nearby</b></div><span class="glass" id="bdg"></span></div>
+<div id="toast" class="glass"></div>
+<div id="scr"></div>
+<div class="tabs glass tb"><span data-a="tab" data-v="map" data-k="map">🗺<small>Map</small></span><span data-a="tab" data-v="friends" data-k="friends">👥<small>Friends</small></span><span data-a="tab" data-v="places" data-k="places">📍<small>Places</small></span><span data-a="tab" data-v="alerts" data-k="alerts">🔔<small>Alerts</small></span><span data-a="tab" data-v="you" data-k="you">👤<small>You</small></span></div>
+<div id="usb" data-a="upd"></div><div id="ob"></div>
+<div id="lg"><div class="logo sm"><svg width="32" height="32" viewBox="0 0 24 24"><path fill="#fff" d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg></div><h3>Welcome to Nearby</h3><p>Share your location with the people you trust</p><button class="g" data-a="login"><svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.4c-.5 2.9-2.2 5.3-4.6 6.9l7.4 5.7c4.3-4 6.9-9.9 6.9-17.1z"/><path fill="#FBBC05" d="M10.5 28.7c-.5-1.4-.8-2.9-.8-4.7s.3-3.3.8-4.7l-7.9-6.1C.9 16.4 0 20.1 0 24s.9 7.6 2.6 10.8l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.4-5.7c-2.1 1.4-4.9 2.3-8.5 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg>Continue with Google</button><small>Satellite map, arrival alerts, friend codes</small></div>
+<div id="bn"><div class="logo sm" style="background:#ef4444;box-shadow:none">⛔</div><h3>Account banned</h3><p id="bnt"></p><button class="g" data-a="retry">Try again</button><button class="g" style="background:transparent;color:#fff;border:1px solid #333;margin-top:0" data-a="out">Sign out</button></div><div id="up"><div class="logo sm">⬆</div><h3>Update required</h3><div id="upt"></div><div class="bar"><i id="ubar"></i></div><button class="g" id="ubtn" data-a="doupd">Update now</button></div>
+<div id="sp"><div class="logo"><svg width="44" height="44" viewBox="0 0 24 24"><path fill="#fff" d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg></div><h3>Nearby</h3><small>Your circle, live</small><div class="steps" id="st"></div><div class="bar"><i id="bar"></i></div></div>
+</div>
+<script src="supabase-config.js"></script>
+<script src="version.js"></script>
+<script type="module" src="app.js"></script>
+</body>
+</html>
