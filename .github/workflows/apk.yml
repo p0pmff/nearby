@@ -1,0 +1,60 @@
+name: Build APK
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_CONFIG: ${{ secrets.SUPABASE_CONFIG }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - run: npm install --no-audit --no-fund
+      - run: node scripts/check-config.mjs
+      - run: npm run build
+      - run: rm -f www/owner.html www/owner.js
+      - run: |
+          VER=$(node -p "require('./package.json').version")
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then VER="${GITHUB_REF_NAME#v}"; fi
+          echo "VER=$VER" >> "$GITHUB_ENV"
+          echo "window.SUPABASE_CONFIG=${SUPABASE_CONFIG};" > www/supabase-config.js
+          echo "window.APP_VERSION=\"$VER\";window.GH_REPO=\"${GITHUB_REPOSITORY}\";" > www/version.js
+          (cd www && zip -qr "../bundle-$VER.zip" .)
+          node -e "const p=require('./package.json');console.log(JSON.stringify({bundle:'bundle-$VER.zip',minApk:p.minApk}))" > body.json
+      - run: npx cap add android
+      - run: |
+          sed -i "s/versionCode 1/versionCode ${{ github.run_number }}/;s/versionName \"1.0\"/versionName \"$(node -p "require('./package.json').minApk")\"/" android/app/build.gradle
+          for P in POST_NOTIFICATIONS ACCESS_FINE_LOCATION ACCESS_COARSE_LOCATION ACCESS_BACKGROUND_LOCATION FOREGROUND_SERVICE FOREGROUND_SERVICE_LOCATION REQUEST_INSTALL_PACKAGES; do sed -i "s#<application#<uses-permission android:name=\"android.permission.$P\"/>\n    <application#" android/app/src/main/AndroidManifest.xml; done
+          sed -i 's#</activity>#    <intent-filter>\n        <action android:name="android.intent.action.VIEW"/>\n        <category android:name="android.intent.category.DEFAULT"/>\n        <category android:name="android.intent.category.BROWSABLE"/>\n        <data android:scheme="com.nearby.app" android:host="login-callback"/>\n    </intent-filter>\n    </activity>#' android/app/src/main/AndroidManifest.xml
+          echo "${{ secrets.KEYSTORE_B64 }}" | base64 -d > "$RUNNER_TEMP/release.jks"
+      - run: npx cap sync android
+      - run: ./gradlew assembleRelease -Pandroid.injected.signing.store.file="$RUNNER_TEMP/release.jks" -Pandroid.injected.signing.store.password="$KS_PASS" -Pandroid.injected.signing.key.alias="$KEY_ALIAS" -Pandroid.injected.signing.key.password="$KEY_PASS"
+        working-directory: android
+        env:
+          KS_PASS: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASS: ${{ secrets.KEY_PASSWORD }}
+      - run: cp android/app/build/outputs/apk/release/app-release.apk nearby.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nearby-release
+          path: |
+            nearby.apk
+            bundle-*.zip
+      - uses: softprops/action-gh-release@v2
+        if: github.ref_type == 'tag'
+        with:
+          files: |
+            nearby.apk
+            bundle-*.zip
+          body_path: body.json
