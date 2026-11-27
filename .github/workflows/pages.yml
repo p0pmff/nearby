@@ -1,0 +1,38 @@
+name: Deploy Pages
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    env:
+      SUPABASE_CONFIG: ${{ secrets.SUPABASE_CONFIG }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install --no-audit --no-fund
+      - run: node scripts/check-config.mjs
+      - run: npm run build
+      - run: |
+          echo "window.SUPABASE_CONFIG=${SUPABASE_CONFIG};" > www/supabase-config.js
+          VER=$(node -p "require('./package.json').version")
+          echo "window.APP_VERSION=\"$VER\";window.GH_REPO=\"${GITHUB_REPOSITORY}\";" > www/version.js
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: www
+      - id: deployment
+        uses: actions/deploy-pages@v4
